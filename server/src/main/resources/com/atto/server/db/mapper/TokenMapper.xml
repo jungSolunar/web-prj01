@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.atto.server.db.mapper.TokenMapper">
+    <select id="selectByTokenKey" parameterType="String" resultType="com.atto.server.model.UserToken">
+        SELECT * FROM TAA_USER_TOKEN
+        <where>
+            TOKEN_KEY = #{id}
+        </where>
+    </select>
+
+    <select id="selectByUserUid" parameterType="String" resultType="com.atto.server.model.UserToken">
+        SELECT * FROM TAA_USER_TOKEN
+        <where>
+            USER_UID = #{id}
+        </where>
+    </select>
+
+    <insert id="insertToken" parameterType="com.atto.server.model.UserToken">
+        INSERT INTO TAA_USER_TOKEN
+        values(#{token_key}, #{user_uid}, #{token_value}, #{expiration_dtm}, #{save_dtm})
+    </insert>
+
+    <delete id="deleteToken" parameterType="com.atto.server.model.UserToken">
+        DELETE from TAA_USER_TOKEN
+        <where>
+            TOKEN_KEY = #{token_key}
+        </where>
+    </delete>
+
+    <update id="updateToken" parameterType="com.atto.server.model.UserToken">
+        UPDATE TAA_USER_TOKEN
+        <set>
+            <!--TOKEN_KEY = #{token_key},-->
+            TOKEN_VALUE = #{token_value},
+            EXPIRATION_DTM = #{expiration_dtm},
+            SAVE_DTM = #{save_dtm}
+        </set>
+        <where>
+            TOKEN_KEY = #{token_key}
+        </where>
+    </update>
+</mapper>

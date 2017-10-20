@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.atto.server.db.mapper.MenuResourceMapper">
+
+    <select id="selectResourcesByGroupId" parameterType="String" resultType="com.atto.server.model.Resource">
+        <!--SELECT TAA_RSC.RSC_UID, TAA_RSC.RSC_ACL_ID, TAA_RSC.FUNC_ACL_ID-->
+        <!--FROM TAA_RSC,-->
+        <!--(SELECT * FROM TAA_GROUP_RSC WHERE GROUP_UID IN (SELECT GROUP_UID FROM TAA_USER_GROUP WHERE USER_UID = #{id})) AS SELETED_TAA_GROUP_RSC-->
+        <!--WHERE TAA_RSC.RSC_UID = SELECTED_TAA_GROUP_RSC.RSC_UID;-->
+        SELECT * FROM ATTO_RSC WHERE RSC_UID
+        IN (SELECT RSC_UID
+        FROM ATTO_GROUP_RSC WHERE GROUP_UID = #{id})
+    </select>
+
+    <select id="selectResource" parameterType="String" resultType="com.atto.server.model.Resource">
+        SELECT * FROM TAA_RSC WHERE RSC_UID = #{id}
+    </select>
+
+    <select id="selectResources" resultType="com.atto.server.model.Resource">
+        SELECT * FROM TAA_RSC;
+    </select>
+
+    <select id="selectResourcesByUserUid" resultType="com.atto.server.model.Resource">
+        SELECT * FROM TAA_GROUP_RSC WHERE GROUP_UID IN (SELECT GROUP_UID FROM TAA_USER_GROUP WHERE USER_UID = #{id}
+    </select>
+
+    <insert id="insertResource" parameterType="com.atto.server.model.Resource">
+        INSERT INTO TAA_RSC values(#{rscUid}, #{rscTypeCode}, #{rscAclId}, #{funcAclId}, #{loggingYn}, #{parentUid}, #{name}, #{note}, #{activeYn}, #{createUid}, #{createDtm}, #{updateUid}, #{updateDtm})
+    </insert>
+
+    <update id="updateResource" parameterType="com.atto.server.model.Resource">
+        UPDATE TAA_RSC
+        <set>
+            RSC_TYPE_CODE = #{rscTypeCode},
+            RSC_ACL_ID = #{rscAclId},
+            FUNC_ACL_ID = #{funcAclId},
+            PARENT_UID = #{parentUid},
+            NAME = #{name},
+            NOTE = #{note},
+            ACTIVE_YN = #{activeYn},
+            LOGGING_YN = #{loggingYn},
+            UPDATE_UID = #{updateUid},
+            UPDATE_DTM = #{updateDtm}
+        </set>
+        <where>
+            RSC_UID = #{rscUid}
+        </where>
+    </update>
+
+    <delete id="deleteResource" parameterType="String">
+        DELETE FROM TAA_RSC WHERE RSC_UID = #{id}
+    </delete>
+
+    <select id="selectMenus" resultType="com.atto.server.model.Menu">
+        SELECT * FROM TAA_MENU
+    </select>
+
+    <insert id="insertMenu" parameterType="com.atto.server.model.Menu">
+        INSERT INTO TAA_MENU values(#{menuUid}, #{menuTypeCode}, #{displayOrder}, #{rscUid}, #{topYn}, #{parentUid}, #{name}, #{note}, #{activeYN}, #{createUid}, #{createDtm}, #{updateUid}, #{updateDtm})
+    </insert>
+
+    <update id="updateMenu" parameterType="com.atto.server.model.Menu">
+        UPDATE TAA_RSC
+        <set>
+            <!--MENU_UID = #{menuUid},-->
+            MENU_TYPE_CODE = #{menuTypeCode},
+            DISPLAY_ORDER = #{displayOrder},
+            RSC_UID = #{rscUid},
+            TOP_YN = #{topYn},
+            PARENT_UID = #{parentUid},
+            NAME = #{name},
+            NOTE = #{note},
+            ACTIVE_YN = #{activeYN},
+            UPDATE_UID = #{updateUid},
+            UPDATE_DTM = #{updateDtm}
+        </set>
+        <where>
+            MENU_UID = #{menuUid}
+        </where>
+    </update>
+
+    <delete id="deleteMenu" parameterType="String">
+        DELETE FROM TAA_MENU WHERE MENU_UID = #{id}
+    </delete>
+
+</mapper>

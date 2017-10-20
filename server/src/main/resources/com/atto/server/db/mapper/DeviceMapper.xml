@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.atto.server.db.mapper.DeviceMapper">
+
+    <select id="selectDevices" resultType="com.atto.server.model.Device">
+        SELECT DEVICE_ID, DEVICE_NAME, MODEL_NAME, CERTIFIED_NUMBER, SERIAL_NUMBER, MAC_ADDRESS, ORDERING_ORGANIZATION, ORDERING_ORGANIZATION_CONTACT, DELIVERY_DATE, DELIVERER, NOTE, DEVICE_URL, UPDATE_UID, UPDATE_DTM
+        FROM ATTO_DEVICE_INFO
+    </select>
+
+    <select id="selectDevicesWithPaging" parameterType="com.atto.server.model.PagingParam" resultType="com.atto.server.model.Device">
+        SELECT DEVICE_ID, DEVICE_NAME, MODEL_NAME, CERTIFIED_NUMBER, SERIAL_NUMBER, MAC_ADDRESS, ORDERING_ORGANIZATION, ORDERING_ORGANIZATION_CONTACT, DELIVERY_DATE, DELIVERER, NOTE, DEVICE_URL, UPDATE_UID, UPDATE_DTM
+        FROM ATTO_DEVICE_INFO
+        ORDER BY ${orderCol} ${order}
+        LIMIT #{startIdx}, #{size}
+    </select>
+
+    <select id="selectDevice" parameterType="String" resultType="com.atto.server.model.Device">
+        SELECT DEVICE_ID, DEVICE_NAME, MODEL_NAME, CERTIFIED_NUMBER, SERIAL_NUMBER, MAC_ADDRESS, ORDERING_ORGANIZATION, ORDERING_ORGANIZATION_CONTACT, DELIVERY_DATE, DELIVERER, NOTE, DEVICE_URL, UPDATE_UID, UPDATE_DTM
+        FROM ATTO_DEVICE_INFO
+        <where>
+           DEVICE_ID = #{id}
+        </where>
+    </select>
+
+    <select id="selectDeviceCount" resultType="Integer">
+        SELECT COUNT(*) FROM ATTO_DEVICE_INFO
+    </select>
+
+    <resultMap id="qrcodeMap" type="com.atto.server.model.QrCode">
+        <result column="QR_CODE" property="data" jdbcType="BLOB" />
+    </resultMap>
+
+    <select id="selectDeviceQrCode" parameterType="String" resultMap="qrcodeMap">
+        SELECT QR_CODE FROM ATTO_DEVICE_INFO
+        <where>
+           DEVICE_ID = #{id}
+        </where>
+    </select>
+
+    <insert id="insertDevice" parameterType="com.atto.server.model.Device">
+        INSERT INTO ATTO_DEVICE_INFO (DEVICE_ID, DEVICE_NAME, MODEL_NAME, CERTIFIED_NUMBER, SERIAL_NUMBER, MAC_ADDRESS, ORDERING_ORGANIZATION, ORDERING_ORGANIZATION_CONTACT, DELIVERY_DATE, DELIVERER, NOTE, DEVICE_URL, QR_CODE)
+        VALUES (#{deviceId}, #{deviceName}, #{modelName}, #{certifiedNumber}, #{serialNumber}, #{macAddress}, #{orderingOrganization}, #{orderingOrganizationContact}, #{deliveryDate}, #{deliverer}, #{note}, #{deviceUrl}, #{qrCode})
+    </insert>
+
+    <update id="updateDevice" parameterType="com.atto.server.model.Device">
+        UPDATE ATTO_DEVICE_INFO
+        <trim prefix="SET" suffixOverrides=",">
+            DEVICE_NAME = #{deviceName},
+            MODEL_NAME = #{modelName},
+            CERTIFIED_NUMBER = #{certifiedNumber},
+            SERIAL_NUMBER = #{serialNumber},
+            MAC_ADDRESS = #{macAddress},
+            ORDERING_ORGANIZATION = #{orderingOrganization},
+            ORDERING_ORGANIZATION_CONTACT = #{orderingOrganizationContact},
+            DELIVERY_DATE = #{deliveryDate},
+            DELIVERER = #{deliverer},
+            NOTE = #{note},
+            UPDATE_UID = #{updateUid},
+            UPDATE_DTM = #{updateDtm},
+        </trim>
+        <where>
+            DEVICE_ID = #{deviceId}
+        </where>
+    </update>
+
+    <delete id="deleteDevice" parameterType="String">
+        DELETE FROM ATTO_DEVICE_INFO
+        <where>
+            DEVICE_ID = #{id}
+        </where>
+    </delete>
+
+    <select id="selectTableColumnNames" parameterType="String" resultType="String">
+        SELECT column_name
+        FROM information_schema.columns
+        WHERE table_name=#{id};
+    </select>
+
+</mapper>

@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.atto.server.db.mapper.AccountMapper">
+    <select id="selectByUserUid" parameterType="String" resultType="com.atto.server.model.User">
+        SELECT USER_UID, LOGIN_ID, EMAIL, PHONE, NAME, NOTE
+        FROM TAA_USER
+        <where>
+           USER_UID = #{id}
+        </where>
+    </select>
+
+    <select id="selectUsers" resultType="com.atto.server.model.User">
+        SELECT USER_UID, LOGIN_ID, EMAIL, PHONE, NAME, NOTE
+        FROM ATTO_USER
+    </select>
+
+    <select id="selectUserByGroupUid" parameterType="String" resultType="com.atto.server.model.User">
+        SELECT USER_UID, LOGIN_ID, EMAIL, PHONE, NAME, NOTE
+        FROM ATTO_USER
+        WHERE USER_UID IN (SELECT USER_UID FROM TAA_USER_GROUP WHERE GROUP_UID=#{id})
+    </select>
+
+    <select id="selectByUserLoginId" parameterType="String" resultType="com.atto.server.model.User">
+        SELECT USER_UID, LOGIN_ID, EMAIL, PHONE, NAME, NOTE
+        FROM ATTO_USER
+        <where>
+            LOGIN_ID = #{id}
+        </where>
+    </select>
+
+    <select id="selectPasswordByUserLoginId" parameterType="String" resultType="String">
+        SELECT LOGIN_PW FROM ATTO_USER WHERE LOGIN_ID=#{id}
+    </select>
+
+    <insert id="insertUser" parameterType="com.atto.server.model.User">
+        INSERT INTO TAA_USER (USER_UID, USER_TYPE_CODE, LOGIN_ID, LOGIN_PW, EMAIL, PHONE, MOBILE, NAME, NOTE, BUILTIN_YN, ACTIVE_YN, CREATE_UID, CREATE_DTM)
+        VALUES (#{userUid}, #{userTypeCode}, #{loginId}, #{loginPw}, #{email}, #{phone}, #{mobile}, #{name}, #{note}, #{builtinYn}, #{activeYn}, #{createUid}, #{createDtm})
+    </insert>
+
+    <update id="updateUser" parameterType="com.atto.server.model.User">
+        UPDATE TAA_USER
+        <trim prefix="SET" suffixOverrides=",">
+            USER_TYPE_CODE = #{userTypeCode},
+            EMAIL = #{email},
+            PHONE = #{phone},
+            MOBILE = #{mobile},
+            NAME = #{name},
+            NOTE = #{note},
+            BUILTIN_YN = #{builtinYn},
+            ACTIVE_YN = #{activeYn},
+            UPDATE_UID = #{updateUid},
+            UPDATE_DTM = #{updateDtm},
+            DISCARD_UID = #{discardUid},
+            DISCARD_DTM = #{discardDtm}
+        </trim>
+        <where>
+            USER_UID = #{userUid}
+        </where>
+    </update>
+
+    <delete id="deleteUser" parameterType="String">
+        DELETE FROM TAA_USER
+        <where>
+            USER_UID = #{id}
+        </where>
+    </delete>
+
+    <select id="selectUserGroups" resultType="com.atto.server.model.UserGroup">
+        SELECT * FROM ATTO_GROUP
+    </select>
+
+    <select id="selectUserGroupByGroupUid" parameterType="String" resultType="com.atto.server.model.UserGroup">
+        SELECT * FROM ATTO_GROUP WHERE GROUP_UID=#{id}
+    </select>
+
+    <select id="selectUserGroupUidByUserUid" parameterType="String" resultType="String">
+        SELECT GROUP_UID FROM ATTO_USER_GROUP WHERE USER_UID=#{id}
+    </select>
+
+    <insert id="insertUserGroup" parameterType="com.atto.server.model.UserGroup">
+        INSERT INTO TAA_GROUP
+        VALUES (#{groupUid}, #{groupTypeCode}, #{svcCode}, #{parentUid}, #{name}, #{note}, #{builtinYn}, #{activeYn}, #{createUid}, #{createDtm}, #{updateUid}, #{updateDtm})
+    </insert>
+
+    <update id="updateUserGroup" parameterType="com.atto.server.model.UserGroup">
+        UPDATE TAA_GROUP
+        <set>
+            GROUP_TYPE_CODE = #{groupTypeCode},
+            SVC_CODE = #{svcCode},
+            PARENT_UID = #{parentUid},
+            NAME = #{name},
+            NOTE = #{note},
+            BUILTIN_YN = #{builtinYn},
+            ACTIVE_YN = #{activeYn},
+            CREATE_UID = #{createUid},
+            CREATE_DTM = #{createDtm},
+            UPDATE_UID = #{updateUid},
+            UPDATE_DTM = #{updateDtm}
+        </set>
+        <where>
+            GROUP_UID = #{groupUid}
+        </where>
+    </update>
+
+    <delete id="deleteUserGroup" parameterType="String">
+        DELETE FROM TAA_GROUP WHERE GROUP_UID = #{groupUid}
+    </delete>
+
+    <insert id="insertUserUserGroup" parameterType="com.atto.server.model.UserUserGroup">
+        INSERT INTO TAA_USER_GROUP
+        VALUES (#{userUid}, #{groupUid}, #{saveUid}, #{saveDtm})
+    </insert>
+
+    <delete id="deleteUserUserGroup" parameterType="com.atto.server.model.UserUserGroup">
+        DELETE FROM TAA_USER_GROUP WHERE USER_UID=#{userUid} and GROUP_UID=#{groupUid}
+    </delete>
+
+</mapper>
