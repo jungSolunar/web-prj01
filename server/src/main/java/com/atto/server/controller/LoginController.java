@@ -3,6 +3,7 @@ package com.atto.server.controller;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.atto.server.service.AccountService;
 import com.atto.server.service.PermissionService;
 import org.json.simple.JSONObject;
 import org.slf4j.Logger;
@@ -15,13 +16,15 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.atto.server.exception.LoginIdOrPasswordNotExistException;
 import com.atto.server.model.DefaultRequestResult;
-import com.atto.server.model.LoginIdPassword;
+import com.atto.server.model.security.LoginIdPassword;
 import com.atto.server.service.SecurityService;
 import com.atto.server.util.HttpUtil;
 import com.atto.server.util.SecurityContext;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Authentication (Login/Logout) REST Controller
@@ -38,11 +41,13 @@ public class LoginController {
     @Autowired
     private PermissionService permissionService;
 
+    @Autowired
+    private AccountService accountService;
+
     @RequestMapping(value = "/login", method = RequestMethod.POST)
-    public List<String> login(HttpServletRequest request, HttpServletResponse response, @RequestBody JSONObject reqBody){
+    public Map<String, Object> login(HttpServletRequest request, HttpServletResponse response, @RequestBody JSONObject reqBody){
 
         logger.trace("[LOGIN] " + request.getRequestURI() + " " + request.getMethod() + " request body = " + reqBody.toJSONString());
-
         try {
             LoginIdPassword loginIdPassword = createLoginIdPasswordFromRequestBody(reqBody);
             securityService.login(loginIdPassword);
@@ -50,14 +55,18 @@ public class LoginController {
             //se.printStackTrace();
             logger.warn("[LOGIN] /login " + request.getMethod() + " request body = " + reqBody.toJSONString() + " failed. " + se.getLocalizedMessage());
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return new ArrayList<>();
+            return new HashMap<>();
         }
 
         logger.info("[LOGIN] login loginId = " + SecurityContext.get().getLoginId());
 
         HttpUtil.addAuthorizationHttpHeaderFromSecurityContextToHttpServletResponse(response);
         response.setStatus(HttpServletResponse.SC_OK);
-        return permissionService.getPermissionsByGroupUid(SecurityContext.get().getGroupId());
+
+        Map<String,Object> jBody = new JSONObject();
+        jBody.put("permissions", permissionService.getAccessPermissions(SecurityContext.get().getUserUid()));
+        jBody.put("user", accountService.getUserByUid(SecurityContext.get().getUserUid()));
+        return jBody;
     }
 
     @RequestMapping(value = "/logout", method = RequestMethod.POST)

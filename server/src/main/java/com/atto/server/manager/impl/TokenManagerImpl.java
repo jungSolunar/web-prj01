@@ -12,8 +12,8 @@ import com.atto.server.exception.ExpiredTokenException;
 import com.atto.server.exception.FailedCreateTokenException;
 import com.atto.server.exception.InvalidTokenException;
 import com.atto.server.manager.TokenManager;
-import com.atto.server.model.Subject;
-import com.atto.server.model.UserToken;
+import com.atto.server.model.security.Subject;
+import com.atto.server.model.security.UserToken;
 import com.atto.server.util.TimeUtil;
 
 import io.jsonwebtoken.Claims;

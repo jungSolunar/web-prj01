@@ -1,6 +1,8 @@
 package com.atto.server.db.mapper;
 
-import com.atto.server.model.*;
+import com.atto.server.model.security.PermDomain;
+import com.atto.server.model.security.Permission;
+import com.atto.server.model.security.Resource;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
@@ -14,26 +16,7 @@ public interface PermissionMapper {
 
 	// uses at PermissionService
 
-	List<PermDomain> selectPermDomains();
-	String selectPermDomainsByAclId(String rscAclId);
-	List<String> selectRscUidByPermission(Map<String, String> permission);
-	List<Resource> selectRscByPermission(Map<String, String> permission);
-	List<String> selectGroupUids();
+	List<Permission> selectPermissionsByUserUid(String userUid);
 
-	String selectPermDomainNameByRscUid(String rscUid);
-
-	void insertPermission(UserGroupResource userGroupResource);
-
-	void deletePermissionsByGroupUid(String groupUid);
-	void deletePermission(UserGroupResource userGroupResource);
-	void deletePermissions(List<UserGroupResource> userGroupResourceList);
-
-	void insertPermDomain(PermDomain permDomain);
-	void updatePermDomain(PermDomain permDomain);
-	void deletePermDomain(String permDomainId);
-
-	void insertRscPermDomain(RscPermDomain rscPermDomain);
-	void updateRscPermDomain(RscPermDomain rscPermDomain);
-	void deleteRscPermDomain(RscPermDomain rscPermDomain);
 
 }

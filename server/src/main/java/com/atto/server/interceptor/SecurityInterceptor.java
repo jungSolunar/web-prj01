@@ -41,24 +41,24 @@ public class SecurityInterceptor extends HandlerInterceptorAdapter{
 //        accessLog.setRemote_host(request.getRemoteHost());
 //        //accessLog.setRequest_dtm();
 
-        try {
-            securityService.authorize(request);
-        } catch (NotPermittedException npe){
-            logger.warn("[SecurityInterceptor] Not Permission : uri = " + request.getRequestURI() + " method = " + request.getMethod() + ". " + npe.getLocalizedMessage());
-            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-            return false;
-        }  catch (SecurityException se) {
-            logger.warn("[SecurityInterceptor] Invalid Request : uri = " + request.getRequestURI() + " method = " + request.getMethod() + ". " + se.getLocalizedMessage());
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return false;
-        }
-
-        // NOTE: For adding Authorization Header to Response, Controller should return Model except ResponseEntity
-        // update token with updated token expiration date
-        response.addHeader(HttpUtil.AUTH_HEADER, HttpUtil.getAuthorizationHttpHeaderValueFromSecuirtyContext());
-
-        logger.debug("[SecurityInterceptor] Vaild Request : uri = " + request.getRequestURI() + " method = " + request.getMethod() +
-                " userUid = " + SecurityContext.get().getUserUid() + " loginId = " + SecurityContext.get().getLoginId());
+//        try {
+//            securityService.authorize(request);
+//        } catch (NotPermittedException npe){
+//            logger.warn("[SecurityInterceptor] Not Permission : uri = " + request.getRequestURI() + " method = " + request.getMethod() + ". " + npe.getLocalizedMessage());
+//            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+//            return false;
+//        }  catch (SecurityException se) {
+//            logger.warn("[SecurityInterceptor] Invalid Request : uri = " + request.getRequestURI() + " method = " + request.getMethod() + ". " + se.getLocalizedMessage());
+//            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+//            return false;
+//        }
+//
+//        // NOTE: For adding Authorization Header to Response, Controller should return Model except ResponseEntity
+//        // update token with updated token expiration date
+//        response.addHeader(HttpUtil.AUTH_HEADER, HttpUtil.getAuthorizationHttpHeaderValueFromSecuirtyContext());
+//
+//        logger.debug("[SecurityInterceptor] Vaild Request : uri = " + request.getRequestURI() + " method = " + request.getMethod() +
+//                " userUid = " + SecurityContext.get().getUserUid() + " loginId = " + SecurityContext.get().getLoginId());
 
         return true;
     }

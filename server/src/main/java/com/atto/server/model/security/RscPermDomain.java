@@ -1,4 +1,4 @@
-package com.atto.server.model;
+package com.atto.server.model.security;
 
 /**
  * Created by dhjung on 2017. 9. 19..

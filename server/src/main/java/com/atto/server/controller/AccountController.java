@@ -6,6 +6,8 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.atto.server.model.account.UserRole;
+import com.atto.server.model.security.Role;
 import org.apache.http.HttpStatus;
 import org.json.simple.JSONObject;
 import org.slf4j.Logger;
@@ -17,8 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.atto.server.model.User;
-import com.atto.server.model.UserGroup;
+import com.atto.server.model.account.User;
 import com.atto.server.service.AccountService;
 
 /**
@@ -41,18 +42,18 @@ public class AccountController {
         return accountService.getUsers();
     }
 
-	@RequestMapping(value = "/accounts/users/{userUid:.*}", method = RequestMethod.GET)
-	public User getUser(HttpServletRequest request, HttpServletResponse response, @PathVariable String userUid) {
+	@RequestMapping(value = "/accounts/users/{userSid:.*}", method = RequestMethod.GET)
+	public User getUser(HttpServletRequest request, HttpServletResponse response, @PathVariable String userSid) {
 
-		logger.trace("[REQUEST] GET /accounts/user/{userUid} : userId = " + userUid);
+		logger.trace("[REQUEST] GET /accounts/user/{userSid} : userId = " + userSid);
 
-		User user = accountService.getUserByUid(userUid);
+		User user = accountService.getUserByUid(userSid);
 
 		if (null == user) {
-			logger.debug("[RESPONSE] GET /accounts/users/" + userUid + " data = NOT FOUND");
+			logger.debug("[RESPONSE] GET /accounts/users/" + userSid + " data = NOT FOUND");
 			response.setStatus(HttpStatus.SC_NOT_FOUND);
 		} else {
-			logger.debug("[RESPONSE] GET /accounts/users/" + userUid + " data = " + user.toString());
+			logger.debug("[RESPONSE] GET /accounts/users/" + userSid + " data = " + user.toString());
 		}
 
 		return user;
@@ -63,7 +64,7 @@ public class AccountController {
 
         logger.trace("[REQUEST] POST /accounts/users " + requestUser.toString());
 
-        String loginId = requestUser.getLoginId();
+        String loginId = requestUser.getUserLoginId();
 
         /* validate request */
         if (loginId == null) {
@@ -92,13 +93,13 @@ public class AccountController {
         return newUser;
     }
 
-    @RequestMapping(value = "/accounts/users/{userUid:.*}", method = RequestMethod.PUT)
-    public User updateUser(HttpServletRequest request, HttpServletResponse response, @PathVariable String userUid, @RequestBody User requestUser) {
+    @RequestMapping(value = "/accounts/users/{userSid:.*}", method = RequestMethod.PUT)
+    public User updateUser(HttpServletRequest request, HttpServletResponse response, @PathVariable String userSid, @RequestBody User requestUser) {
 
-        logger.trace("[REQUEST] PUT /accounts/user/" + userUid);
+        logger.trace("[REQUEST] PUT /accounts/user/" + userSid);
 
-        if (requestUser.getUserUid() == null) {
-            requestUser.setUserUid(userUid);
+        if (requestUser.getUserSid() == null) {
+            requestUser.setUserSid(userSid);
         }
 
         User updatedUser = null;
@@ -106,122 +107,35 @@ public class AccountController {
             updatedUser = accountService.modifyUser(requestUser);
         } catch (Exception e) {
             e.printStackTrace();
-            logger.debug("[RESPONSE] PUT /accounts/user/{userUid} : failed " + userUid + " " + e.getLocalizedMessage());
+            logger.debug("[RESPONSE] PUT /accounts/user/{userUid} : failed " + userSid + " " + e.getLocalizedMessage());
             response.setStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR);
         }
 
         if (updatedUser == null) {
-            logger.debug("[RESPONSE] PUT /accounts/user/{userUid} : failed to find User [userId=" + userUid + "]" );
+            logger.debug("[RESPONSE] PUT /accounts/user/{userUid} : failed to find User [userId=" + userSid + "]" );
             response.setStatus(HttpStatus.SC_NOT_FOUND);
         }
 
         return updatedUser;
     }
 
-    @RequestMapping(value = "/accounts/users/{userUid}", method = RequestMethod.DELETE)
-    public void deleteUser(HttpServletRequest request, HttpServletResponse response, @PathVariable String userUid) {
+    @RequestMapping(value = "/accounts/users/{userSid}", method = RequestMethod.DELETE)
+    public void deleteUser(HttpServletRequest request, HttpServletResponse response, @PathVariable String userSid) {
 
-        logger.trace("[REQUEST] DELETE /accounts/user/{userUid} : userId = " + userUid);
+        logger.trace("[REQUEST] DELETE /accounts/user/{userUid} : userId = " + userSid);
 
         response.setStatus(HttpStatus.SC_NO_CONTENT);
 
-        accountService.removeUser(userUid);
+        accountService.removeUser(userSid);
     }
 
-    @RequestMapping(value = "/accounts/usergroups", method = RequestMethod.GET)
-    public List<UserGroup> getUserGroups(HttpServletRequest request, HttpServletResponse response) {
+    @RequestMapping(value = "/acciunts/users/{userSid}/assign", method = RequestMethod.POST)
+    public Role assignRole(HttpServletRequest request, HttpServletResponse response, @PathVariable String userSid, @RequestBody Map<String, String> role){
+        logger.trace("[REQUEST] POST /accounts/user/{userUid}/assign : userId = " + userSid);
 
-        logger.trace("[REQUEST] GET /accounts/usergroups");
+        UserRole userRole = new UserRole(userSid, role.get("roleSid"));
 
-        return accountService.getUserGroups();
+        return accountService.assignRole(userRole);
     }
 
-    @RequestMapping(value = "/accounts/usergroups/users", method = RequestMethod.GET)
-    public Map<String, Object> getUsersInUserGroups(HttpServletRequest request, HttpServletResponse response) {
-
-        logger.trace("[REQUEST] GET /accounts/usergroups/users");
-
-        return accountService.getUsersByUserGroups();
-    }
-
-    @RequestMapping(value = "/accounts/usergroups/{groupUid:.*}/users", method = RequestMethod.GET)
-    public List<User> getUsersInUserGroups(HttpServletRequest request, HttpServletResponse response, @PathVariable String groupUid) {
-
-        logger.trace("[REQUEST] GET /accounts/usergroups/"+ groupUid + "/users");
-
-        return accountService.getUserByGroupUid(groupUid);
-    }
-
-    @RequestMapping(value = "/accounts/usergroups/{groupUid:.*}", method = RequestMethod.GET)
-    public UserGroup getUserGroup(HttpServletRequest request, HttpServletResponse response, @PathVariable String groupUid) {
-
-        logger.trace("[REQUEST] GET /accounts/usergroups/" + groupUid);
-
-        return accountService.getUserGroupByUid(groupUid);
-    }
-
-    @RequestMapping(value = "/accounts/usergroups/{groupUid:.*}", method = RequestMethod.POST)
-    public UserGroup postUserGroup(HttpServletRequest request, HttpServletResponse response, @PathVariable String groupUid, @RequestBody UserGroup userGroup) {
-
-        logger.trace("[REQUEST] POST /accounts/usergroups/" + groupUid);
-
-        response.setStatus(HttpServletResponse.SC_CREATED);
-
-        return accountService.addUserGroup(userGroup);
-    }
-
-    @RequestMapping(value = "/accounts/usergroups/{groupUid:.*}", method = RequestMethod.PUT)
-    public UserGroup putUserGroup(HttpServletRequest request, HttpServletResponse response, @PathVariable String groupUid, @RequestBody UserGroup userGroup) {
-
-        logger.trace("[REQUEST] PUT /accounts/usergroups/" + groupUid);
-
-        return accountService.modifyUserGroup(userGroup);
-    }
-
-    @RequestMapping(value = "/accounts/usergroups/{groupUid:.*}", method = RequestMethod.DELETE)
-    public void deleteUserGroup(HttpServletRequest request, HttpServletResponse response, @PathVariable String groupUid) {
-
-        logger.trace("[REQUEST] DELETE /accounts/usergroups/" + groupUid);
-
-        response.setStatus(HttpServletResponse.SC_NO_CONTENT);
-
-        accountService.removeUserGroup(groupUid);
-    }
-
-    @RequestMapping(value = "/accounts/usergroups/{groupUid:.*}/enroll", method = RequestMethod.POST)
-    public List<User> postEnrollInUserGroup(HttpServletRequest request, HttpServletResponse response, @PathVariable String groupUid, @RequestBody JSONObject body) {
-
-        logger.trace("[REQUEST] POST /accounts/usergroups/" + groupUid + "/enroll");
-
-        response.setStatus(HttpServletResponse.SC_CREATED);
-
-        if(body.keySet().contains("user")) {
-            return accountService.enrollUser(groupUid, body.get("user").toString());
-        }
-//        else if(body.keySet().contains("usergroup")){
-//            return accountService.enrollUserGroup(groupUid, body.get("usergroup").toString());
-//        }
-        else {
-            return null;
-        }
-    }
-
-    @RequestMapping(value = "/accounts/usergroups/{groupUid:.*}/fire", method = RequestMethod.POST)
-    public List<User> postFireInUserGroup(HttpServletRequest request, HttpServletResponse response, @PathVariable String groupUid, @RequestBody JSONObject body) {
-
-        logger.trace("[REQUEST] POST /accounts/usergroups/" + groupUid + "/fire");
-
-        // if set NO CONTENT, response has no data on body
-        //response.setStatus(HttpServletResponse.SC_NO_CONTENT);
-
-        if(body.keySet().contains("user")) {
-            return accountService.unEnrollUser(groupUid, body.get("user").toString());
-        }
-//        else if(body.keySet().contains("usergroup")){
-//            return accountService.enrollUserGroup(groupUid, body.get("usergroup").toString());
-//        }
-        else {
-            return null;
-        }
-    }
 }

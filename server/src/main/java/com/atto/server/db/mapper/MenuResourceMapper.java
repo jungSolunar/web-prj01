@@ -1,7 +1,7 @@
 package com.atto.server.db.mapper;
 
-import com.atto.server.model.Menu;
-import com.atto.server.model.Resource;
+import com.atto.server.model.ft.Menu;
+import com.atto.server.model.security.Resource;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;

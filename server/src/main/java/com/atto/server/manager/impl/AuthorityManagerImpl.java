@@ -7,8 +7,8 @@ import org.springframework.stereotype.Component;
 
 import com.atto.server.db.mapper.PermissionMapper;
 import com.atto.server.manager.AuthorityManager;
-import com.atto.server.model.Permission;
-import com.atto.server.model.Subject;
+import com.atto.server.model.security.Permission;
+import com.atto.server.model.security.Subject;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -3,7 +3,7 @@ package com.atto.server.manager.impl;
 import java.util.Date;
 
 import com.atto.server.db.mapper.AccountMapper;
-import com.atto.server.model.LoginIdPassword;
+import com.atto.server.model.security.LoginIdPassword;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

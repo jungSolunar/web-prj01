@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.atto.server.db.mapper.AccountMapper">
+
+    <!-- Store -->
+    <select id="selectStores" parameterType="com.atto.server.model.util.PagingParam" resultType="com.atto.server.model.ft.Store">
+        SELECT * FROM FT_STORE
+        ORDER BY STORE_NAME ASC
+        <choose>
+            <when test="startIdx > -1 and size > -1">
+                LIMIT #{startIdx}, #{size}
+            </when>
+        </choose>
+    </select>
+
+    <select id="selectStoreByStoreSid" parameterType="String" resultType="com.atto.server.model.ft.Store">
+        SELECT * FROM FT_STORE WHERE STORE_SID = #{id}
+    </select>
+
+    <insert id="insertStore" parameterType="com.atto.server.model.ft.Store">
+        INSERT INTO FT_STORE (STORE_SID, STORE_NAME, USER_SID, STORE_LOCATION)
+        VALUES (#{storeSid}, #{storeName}, #{userSid}, #{storeLocation})
+    </insert>
+
+    <update id="updateStore" parameterType="com.atto.server.model.ft.Store">
+        UPDATE TF_STORE
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="storeName != null">STORE_NAME = #{storeName},</if>
+            <if test="userSid != null">USER_SID = #{userSid},</if>
+            <if test="storeLocation != null">STORE_LOCATION = #{storeLocation}</if>
+        </trim>
+        <where>
+            STORE_SID = #{storeSid}
+        </where>
+    </update>
+
+    <delete id="deleteStore" parameterType="String">
+        DELETE FROM FT_STORE
+        <where>
+            STORE_SID = #{id}
+        </where>
+    </delete>
+
+    <!-- Menu -->
+    <select id="selectMenus" parameterType="String" resultType="com.atto.server.model.ft.Menu">
+        SELECT * FROM FT_MENU ORDER BY MENU_PRIORITY ASC
+    </select>
+
+    <select id="selectMenuByMenuSid" parameterType="String" resultType="com.atto.server.model.ft.Menu">
+        SELECT * FROM FT_MENU WHERE STORE_SID = #{storeSid} AND MENU_SID = #{menuSid}
+    </select>
+
+    <insert id="insertMenu" parameterType="com.atto.server.model.ft.Menu">
+        INSERT INTO FT_MENU (MENU_SID, MENU_NAME, STORE_SID, MENU_PRICE, MENU_IMG_SID, MENU_PRIORITY, MENU_STATE, VISIBLE, NOTE)
+        VALUES (#{menuSid}, #{menuName}, #{storeSid}, #{menuPrice}, #{menuImgSid}, #{menuPriority}, #{menuState}, #{visible}, #{note})
+    </insert>
+
+    <update id="updateMenu" parameterType="com.atto.server.model.ft.Menu">
+        UPDATE TF_MENU
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="menuName != null">MENU_NAME = #{menuName},</if>
+            <if test="menuPrice != null">MENU_PRICE = #{menuPrice},</if>
+            <if test="menuImgSid != null">MENU_IMG_SID = #{menuImgSid}</if>
+            <if test="menuPriority != null">MENU_PRIORITY = #{menuPriority}</if>
+            <if test="menuState != null">MENU_STATE = #{menuState}</if>
+            <if test="visible != null">VISIBLE = #{visible}</if>
+            <if test="note != null">NOTE = #{note}</if>
+        </trim>
+        <where>
+            MENU_SID = #{menuSid}
+        </where>
+    </update>
+
+    <delete id="deleteMenu" parameterType="String">
+        DELETE FROM FT_MENU
+        <where>
+            MENU_SID = #{id}
+        </where>
+    </delete>
+
+    <!-- Order -->
+    <select id="selectOrders" parameterType="String" resultType="com.atto.server.model.ft.Order">
+        SELECT * FROM FT_ORDER ORDER BY ORDER_DTM ASC
+    </select>
+
+    <select id="selectOrderByOrderSid" parameterType="String" resultType="com.atto.server.model.ft.Order">
+        SELECT * FROM FT_ORDER WHERE STORE_SID = #{storeSid} AND ORDER_SID = #{orderSid}
+    </select>
+
+    <insert id="insertOrder" parameterType="com.atto.server.model.ft.Order">
+        INSERT INTO FT_ORDER (ORDER_SID, STORE_SID, USER_SID, PAYMENT, PAY, ORDER_DTM, COMPLETE, NOTE)
+        VALUES (#{menuSid}, #{menuName}, #{storeSid}, #{menuPrice}, #{menuImgSid}, #{menuPriority}, #{menuState}, #{visible}, #{note})
+    </insert>
+
+    <insert id="insertOrderMenu" parameterType="com.atto.server.model.ft.Order">
+        INSERT INTO FT_ORDER_MENU (ORDER_SID, MENU_SID, MENU_COUNT)
+        VALUES
+        <foreach collection="menus" item="item" separator=",">
+            (#{orderSid}, #{item.menuSid}, #{item.menuCount})
+        </foreach>
+    </insert>
+
+    <update id="updateOrder" parameterType="com.atto.server.model.ft.Order">
+        UPDATE TF_ORDER
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="pay != null">PAY = #{pay},</if>
+            <if test="complete != null">COMPLETE = #{complete}</if>
+        </trim>
+        <where>
+            ORDER_SID = #{orderSid}
+        </where>
+    </update>
+
+    <delete id="deleteOrder" parameterType="String">
+        DELETE FROM FT_ORDER
+        <where>
+            ORDER_SID = #{id}
+        </where>
+    </delete>
+
+    <delete id="deleteOrderMenu" parameterType="String">
+        DELETE FROM FT_ORDER_MENU WHERE ORDER_SID = #{id}
+    </delete>
+
+</mapper>

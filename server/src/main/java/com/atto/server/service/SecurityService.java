@@ -2,7 +2,7 @@ package com.atto.server.service;
 
 import javax.servlet.http.HttpServletRequest;
 
-import com.atto.server.model.LoginIdPassword;
+import com.atto.server.model.security.LoginIdPassword;
 
 /**
  * Security (Authentication/Authorization) Service Main Class

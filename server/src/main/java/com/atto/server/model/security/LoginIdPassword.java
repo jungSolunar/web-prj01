@@ -1,4 +1,4 @@
-package com.atto.server.model;
+package com.atto.server.model.security;
 
 import org.json.simple.JSONObject;
 

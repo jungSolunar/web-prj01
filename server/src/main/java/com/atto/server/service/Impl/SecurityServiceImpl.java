@@ -17,9 +17,9 @@ import com.atto.server.exception.UnenrolledUserException;
 import com.atto.server.manager.AuthorityManager;
 import com.atto.server.manager.CredentialManager;
 import com.atto.server.manager.TokenManager;
-import com.atto.server.model.LoginIdPassword;
-import com.atto.server.model.Subject;
-import com.atto.server.model.User;
+import com.atto.server.model.security.LoginIdPassword;
+import com.atto.server.model.security.Subject;
+import com.atto.server.model.account.User;
 import com.atto.server.service.AccountService;
 import com.atto.server.service.SecurityService;
 import com.atto.server.util.HttpUtil;
@@ -99,7 +99,6 @@ public class SecurityServiceImpl implements SecurityService {
         try {
             currentSubject = tokenManager.getSubjectFromToken(token);
             tokenManager.updateExpirationDateFromSubuject(currentSubject);
-            currentSubject.setGroupId(accountService.getUserGroupUidByUserUid(currentSubject.getUserUid()));
             SecurityContext.set(currentSubject);
         } catch (InvalidTokenException ite) {
             throw new SecurityException("Failed to get a subject and update eixpiration date for given token = " + token + " . " + ite.getLocalizedMessage(), ite);
@@ -107,7 +106,6 @@ public class SecurityServiceImpl implements SecurityService {
 
         if (!authorizeWithSubjectAndRequest(currentSubject, requestUri, requestMethod)) {
             NotPermittedException npe = new NotPermittedException("Not Permitted Request LoginId = " + currentSubject.getLoginId() + " request = " + requestUri + " " + requestMethod);
-//            throw new SecurityException("Failed to authroize the reuqest path = " + requestUri + " " + requestMethod + ". " + npe.getLocalizedMessage(), npe);
             throw npe;
         }
 
@@ -129,9 +127,8 @@ public class SecurityServiceImpl implements SecurityService {
         User registeredUser = accountService.getUserByLoginId(userLoginId);
 
         Subject subject = new Subject();
-        subject.setUserUid(registeredUser.getUserUid());
-        subject.setLoginId(registeredUser.getLoginId());
-        subject.setGroupId(accountService.getUserGroupUidByUserUid(registeredUser.getUserUid()));
+        subject.setUserUid(registeredUser.getUserSid());
+        subject.setLoginId(registeredUser.getUserLoginId());
         // TODO ADD GROUP UID
 
         tokenManager.createTokenAndUpdateSubject(subject);

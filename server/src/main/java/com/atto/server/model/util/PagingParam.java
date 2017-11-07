@@ -1,4 +1,4 @@
-package com.atto.server.model;
+package com.atto.server.model.util;
 
 import static com.atto.server.constant.SecurityConstant.SQL_ORDER_ASC;
 import static com.atto.server.constant.SecurityConstant.SQL_ORDER_DESC;

@@ -1,128 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.atto.server.db.mapper.PermissionMapper">
-    <select id="hasPermissionByUser" parameterType="com.atto.server.model.Permission" resultType="Boolean">
-     SELECT COUNT(*)
-     FROM
-         (SELECT * FROM ATTO_RSC WHERE RSC_UID
-             IN (SELECT RSC_UID
-                 FROM ATTO_GROUP_RSC WHERE GROUP_UID
-                 IN (SELECT GROUP_UID FROM ATTO_USER_GROUP WHERE USER_UID = #{userUid})
-             )
-         ) AS SELECTED_ATTO_RSC
-     WHERE SELECTED_ATTO_RSC.RSC_URL = #{domain} and SELECTED_ATTO_RSC.RSC_METHOD = #{action};
+
+    <select id="selectPermissionsByUserUid" parameterType="String" resultType="com.atto.server.model.Permission">
+        SELECT PERM_LIST.PERM_UID as id, TAA_DOMAIN.NAME as name, PERM_LIST.PERM_ACTION as action
+        FROM FT_DOMAIN,
+        (SELECT * FROM FT_PERM
+        WHERE PERM_UID IN (SELECT PERM_UID FROM FT_ROLE_PERM
+        WHERE ROLE_SID IN (SELECT ROLE_SID FROM FT_USER_ROLE
+        WHERE USER_SID=#{id}))) as PERM_LIST
+        WHERE PERM_LIST.DOMAIN_SID = FT_DOMAIN.DOMAIN_SID;
     </select>
-
-    <select id="selectPermDomains" resultType="String">
-        SELECT NAME FROM ATTO_DOMAIN;
-    </select>
-
-    <select id="selectPermDomainsByAclId" parameterType="String" resultType="String">
-        SELECT NAME FROM ATTO_DOMAIN
-        WHERE DOMAIN_UID IN
-            (SELECT DOMAIN_UID FROM ATTO_RSC_DOMAIN
-            WHERE RSC_UID IN
-                (SELECT ATTO_RSC_DOMAIN.RSC_UID FROM ATTO_RSC_DOMAIN,
-                                                    (SELECT RSC_UID FROM ATTO_RSC WHERE RSC_URL=#{url}) as RSC_BY_URL
-                WHERE ATTO_RSC_DOMAIN.RSC_UID=RSC_BY_URL.RSC_UID)
-            );
-    </select>
-
-    <select id="selectRscUidByPermission" parameterType="map" resultType="String">
-        SELECT RSC_UID from TAA_RSC
-        WHERE RSC_ACL_ID IN
-            (SELECT RSC_ACL_ID FROM TAA_RSC
-            WHERE RSC_UID IN
-                (SELECT RSC_UID FROM TAA_RSC_DOMAIN
-                WHERE DOMAIN_UID IN
-                    (SELECT DOMAIN_UID FROM TAA_DOMAIN
-                    WHERE NAME=#{domain})))
-            and TAA_RSC.FUNC_ACL_ID=#{action};
-    </select>
-
-    <select id="selectRscByPermission" parameterType="map" resultType="com.atto.server.model.Resource">
-        SELECT * from TAA_RSC
-        WHERE RSC_ACL_ID IN
-            (SELECT RSC_ACL_ID FROM TAA_RSC
-            WHERE RSC_UID IN
-                (SELECT RSC_UID FROM TAA_RSC_DOMAIN
-                WHERE DOMAIN_UID IN
-                    (SELECT DOMAIN_UID FROM TAA_DOMAIN
-                    WHERE NAME=#{domain})))
-            and TAA_RSC.FUNC_ACL_ID=#{action};
-    </select>
-
-    <select id="selectGroupUids" resultType="String">
-        SELECT DISTINCT GROUP_UID from TAA_GROUP_RSC;
-    </select>
-
-    <insert id="insertPermission" parameterType="com.atto.server.model.UserGroupResource">
-        INSERT INTO TAA_GROUP_RSC
-        values(#{groupUid}, #{rscUid}, #{saveUid}, #{saveDtm})
-    </insert>
-
-    <delete id="deletePermission" parameterType="com.atto.server.model.UserGroupResource">
-        DELETE FROM TAA_GROUP_RSC WHERE GROUP_UID = #{groupUid} and RSC_UID = #{rscUid}
-
-    </delete>
-
-    <delete id="deletePermissionsByGroupUid" parameterType="String">
-        DELETE FROM TAA_GROUP_RSC WHERE GROUP_UID=#{id}
-    </delete>
-
-    <select id="selectPermDomainNameByRscUid" parameterType="String" resultType="String">
-        SELECT NAME FROM ATTO_DOMAIN WHERE DOMAIN_UID IN (SELECT DOMAIN_UID FROM ATTO_RSC_DOMAIN WHERE RSC_UID=#{id})
-    </select>
-
-    <insert id="insertPermDomain" parameterType="com.atto.server.model.PermDomain">
-        INSERT INTO TAA_DOMAIN
-        values(#{domainUid}, #{name}, #{saveUid}, #{saveDtm})
-    </insert>
-
-    <update id="updatePermDomain" parameterType="com.atto.server.model.PermDomain">
-        UPDATE TAA_DOMAIN
-        <set>
-            <!--TOKEN_KEY = #{token_key},-->
-            NAME = #{name},
-            SAVE_UID = #{saveUid},
-            SAVE_DTM = #{saveDtm}
-        </set>
-        <where>
-            TOKEN_KEY = #{domainUid}
-        </where>
-    </update>
-
-    <delete id="deletePermDomain" parameterType="String">
-        DELETE from TAA_DOMAIN
-        <where>
-            DOMAIN_UID = #{id}
-        </where>
-    </delete>
-
-
-    <insert id="insertRscPermDomain" parameterType="com.atto.server.model.RscPermDomain">
-        INSERT INTO TAA_RSC_DOMAIN
-        values(#{domainUid}, #{rscUid}, #{saveUid}, #{saveDtm})
-    </insert>
-
-    <update id="updateRscPermDomain" parameterType="com.atto.server.model.RscPermDomain">
-        UPDATE TAA_RSC_DOMAIN
-        <set>
-            <!--TOKEN_KEY = #{token_key},-->
-            SAVE_UID = #{saveUid},
-            SAVE_DTM = #{saveDtm}
-        </set>
-        <where>
-            DOMAIN_UID = #{domainUid}
-            and RSC_UID = #{rscUid}
-        </where>
-    </update>
-
-    <delete id="deleteRscPermDomain" parameterType="com.atto.server.model.RscPermDomain">
-        DELETE from TAA_DOMAIN
-        <where>
-            DOMAIN_UID = #{domainUid}
-            and RSC_UID = #{rscUid}
-        </where>
-    </delete>
 </mapper>
